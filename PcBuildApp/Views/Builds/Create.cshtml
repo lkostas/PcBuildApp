@@ -1,0 +1,687 @@
+@model PcBuildApp.DTO.BuildCreateDTO
+
+@{
+ViewData["Title"] = "Create PC Build";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4><i class="bi bi-tools me-2"></i>Create Your PC Build</h4>
+                </div>
+                <div class="card-body">
+                    <form id="build-form">
+                        <!-- Step 1: CPU -->
+                        <div class="build-step mb-4" id="step-cpu">
+                            <h5>1. Choose Processor (CPU)</h5>
+                            <select id="cpu-select" class="form-select" onchange="loadCompatibleComponents('motherboard')">
+                                <option value="">Select CPU...</option>
+                            </select>
+                        </div>
+
+                        <!-- Step 2: Motherboard -->
+                        <div class="build-step mb-4" id="step-motherboard" style="display: none;">
+                            <h5>2. Choose Motherboard</h5>
+                            <select id="motherboard-select" class="form-select" onchange="loadCompatibleComponents('ram')">
+                                <option value="">Select Motherboard...</option>
+                            </select>
+                        </div>
+
+                        <!-- Step 3: RAM -->
+                        <div class="build-step mb-4" id="step-ram" style="display: none;">
+                            <h5>3. Choose Memory (RAM)</h5>
+                            <select id="ram-select" class="form-select" onchange="loadCompatibleComponents('gpu')">
+                                <option value="">Select RAM...</option>
+                            </select>
+                        </div>
+
+                        <!-- Step 4: GPU -->
+                        <div class="build-step mb-4" id="step-gpu" style="display: none;">
+                            <h5>4. Choose Graphics Card (GPU)</h5>
+                            <select id="gpu-select" class="form-select" onchange="loadCompatibleComponents('storage')">
+                                <option value="">Select GPU...</option>
+                            </select>
+                        </div>
+
+                        <!-- Step 5: Storage -->
+                        <div class="build-step mb-4" id="step-storage" style="display: none;">
+                            <h5>5. Choose Storage</h5>
+                            <select id="storage-select" class="form-select" onchange="loadCompatibleComponents('psu')">
+                                <option value="">Select Storage...</option>
+                            </select>
+                        </div>
+
+                        <!-- Step 6: PSU -->
+                        <div class="build-step mb-4" id="step-psu" style="display: none;">
+                            <h5>6. Choose Power Supply (PSU)</h5>
+                            <p class="text-muted small">Minimum required: <span id="min-psu-power">0W</span></p>
+                            <select id="psu-select" class="form-select" onchange="loadCompatibleComponents('cooling')">
+                                <option value="">Select PSU...</option>
+                            </select>
+                        </div>
+
+                        <!-- Step 7: Cooling -->
+                        <div class="build-step mb-4" id="step-cooling" style="display: none;">
+                            <h5>7. Choose CPU Cooling</h5>
+                            <select id="cooling-select" class="form-select" onchange="loadCompatibleComponents('case')">
+                                <option value="">Select Cooling...</option>
+                            </select>
+                        </div>
+
+                        <!-- Step 8: Case -->
+                        <div class="build-step mb-4" id="step-case" style="display: none;">
+                            <h5>8. Choose Case</h5>
+                            <select id="case-select" class="form-select" onchange="enableCompleteButton()">
+                                <option value="">Select Case...</option>
+                            </select>
+                        </div>
+
+                        <!-- Compatibility Status -->
+                        <div id="compatibility-status" style="display: none;" class="mt-3"></div>
+
+                        <!-- Complete Button -->
+                        <button type="button" id="complete-btn" class="btn btn-success" onclick="completeBuild()" disabled>
+                            <i class="bi bi-check-circle"></i> Complete Build
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Build Summary -->
+        <div class="col-lg-4">
+            <div class="card sticky-top">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="bi bi-list-check me-2"></i>Build Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div id="build-summary">
+                        <div class="mb-2">Total Cost: <span id="total-cost" class="text-success fw-bold">$0.00</span></div>
+                        <div class="mb-2">Power: <span id="total-power">0W</span></div>
+                        <div class="mb-2">Progress: <span id="progress">0/8</span></div>
+                    </div>
+
+                    <hr>
+
+                    <div id="selected-components">
+                        <!-- Selected components will appear here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="completeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-check-circle-fill me-2"></i>Build Complete!
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Success Banner -->
+                <div class="alert alert-success border-0 mb-4">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <i class="bi bi-trophy-fill display-4 text-warning"></i>
+                        </div>
+                        <div class="col">
+                            <h6 class="mb-1">Congratulations!</h6>
+                            <p class="mb-0">Your custom PC build is ready. Here's your performance analysis:</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance Metrics -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="card text-center border-success">
+                            <div class="card-body py-3">
+                                <h4 class="text-success mb-1" id="final-cost">$0.00</h4>
+                                <small class="text-muted">Total Cost</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center border-info">
+                            <div class="card-body py-3">
+                                <h4 class="text-info mb-1" id="final-power">0W</h4>
+                                <small class="text-muted">Power Draw</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center border-warning">
+                            <div class="card-body py-3">
+                                <h4 class="mb-1" id="bottleneck-result">Excellent</h4>
+                                <small class="text-muted">Balance Rating</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance Details -->
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">
+                            <i class="bi bi-cpu me-2"></i>Performance Analysis
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <div class="bg-success rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                    <i class="bi bi-speedometer2 text-white fs-5"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-1">System Balance</h6>
+                                <p class="mb-0 text-muted" id="bottleneck-details">Your CPU and GPU are well balanced for optimal performance.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selected Components Summary -->
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">
+                            <i class="bi bi-list-check me-2"></i>Your Components
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row small" id="modal-components-list">
+                            <!-- Components will be populated here by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Save Build Form -->
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">
+                            <i class="bi bi-save me-2"></i>Save Your Build
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label for="build-name" class="form-label">Build Name</label>
+                                    <input type="text" id="build-name" class="form-control" placeholder="My Gaming PC">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">&nbsp;</label>
+                                    <div class="form-check mt-2">
+                                        <input class="form-check-input" type="checkbox" id="make-public">
+                                        <label class="form-check-label" for="make-public">
+                                            <i class="bi bi-globe me-1"></i>Make Public
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-2"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-success btn-lg" onclick="saveBuild()">
+                    <i class="bi bi-save me-2"></i>Save Build
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Simple component data and build state
+    let selectedComponents = {};
+    let components = {};
+
+    // Load initial CPU options
+    document.addEventListener('DOMContentLoaded', function() {
+        loadComponents('cpu', 1);
+    });
+
+    // Load components by category
+    async function loadComponents(category, categoryId) {
+        try {
+            const response = await fetch(`/Components/GetComponentsByCategory?categoryId=${categoryId}`);
+            components[category] = await response.json();
+            populateSelect(category, components[category]);
+        } catch (error) {
+            // Fallback to hardcoded data
+            components[category] = getHardcodedComponents(category);
+            populateSelect(category, components[category]);
+        }
+    }
+
+    // Populate select dropdown
+    function populateSelect(category, items) {
+        const select = document.getElementById(`${category}-select`);
+        select.innerHTML = `<option value="">Select ${category.toUpperCase()}...</option>`;
+
+        items.forEach(item => {
+            const option = document.createElement('option');
+            option.value = JSON.stringify(item);
+            option.textContent = `${item.name} - $${item.price}`;
+            select.appendChild(option);
+        });
+    }
+
+    // Handle component selection and load compatible next components
+    function loadCompatibleComponents(nextCategory) {
+        const currentSelect = event.target;
+        const component = JSON.parse(currentSelect.value);
+        const category = currentSelect.id.replace('-select', '');
+
+        selectedComponents[category] = component;
+        updateSummary();
+        checkCompatibility();
+
+        // Load compatible components for next step
+        const categoryMap = {
+            'motherboard': { id: 6, filter: filterMotherboards },
+            'ram': { id: 3, filter: filterRAM },
+            'gpu': { id: 2, filter: (items) => items },
+            'storage': { id: 4, filter: (items) => items },
+            'psu': { id: 5, filter: filterPSU },
+            'cooling': { id: 7, filter: (items) => items },
+            'case': { id: 8, filter: (items) => items }
+        };
+
+        if (categoryMap[nextCategory]) {
+            loadComponents(nextCategory, categoryMap[nextCategory].id)
+                .then(() => {
+                    const filtered = categoryMap[nextCategory].filter(components[nextCategory] || []);
+                    populateSelect(nextCategory, filtered);
+                    showNextStep(nextCategory);
+                });
+        }
+    }
+
+    // Enhanced compatibility checking function
+    function checkCompatibility() {
+        const compatibility = {
+            issues: [],
+            warnings: []
+        };
+
+        // CPU/Motherboard socket compatibility
+        if (selectedComponents.cpu && selectedComponents.motherboard) {
+            const cpuName = selectedComponents.cpu.name.toLowerCase();
+            const motherboardName = selectedComponents.motherboard.name.toLowerCase();
+
+            const isIntelCPU = cpuName.includes('intel') || cpuName.includes('i3') ||
+                cpuName.includes('i5') || cpuName.includes('i7') || cpuName.includes('i9');
+            const isAMDCPU = cpuName.includes('amd') || cpuName.includes('ryzen');
+
+            const isIntelMotherboard = motherboardName.includes('intel') ||
+                motherboardName.includes('lga') ||
+                motherboardName.includes('z790') ||
+                motherboardName.includes('z690') ||
+                motherboardName.includes('b760') ||
+                motherboardName.includes('b660') ||
+                motherboardName.includes('h670') ||
+                motherboardName.includes('h610');
+
+            const isAMDMotherboard = motherboardName.includes('amd') ||
+                motherboardName.includes('am4') ||
+                motherboardName.includes('am5') ||
+                motherboardName.includes('x670') ||
+                motherboardName.includes('b650') ||
+                motherboardName.includes('b550') ||
+                motherboardName.includes('x570');
+
+            if (isIntelCPU && isAMDMotherboard) {
+                compatibility.issues.push('⚠️ Intel CPU is not compatible with AMD motherboard socket');
+            } else if (isAMDCPU && isIntelMotherboard) {
+                compatibility.issues.push('⚠️ AMD CPU is not compatible with Intel motherboard socket');
+            }
+        }
+
+        // DDR4/DDR5 compatibility check
+        if (selectedComponents.motherboard && selectedComponents.ram) {
+            const motherboardName = selectedComponents.motherboard.name.toLowerCase();
+            const ramName = selectedComponents.ram.name.toLowerCase();
+
+            // Enhanced motherboard DDR5 detection
+            const motherboardDDR5 = motherboardName.includes('ddr5') ||
+                motherboardName.includes('z790') ||
+                motherboardName.includes('z690') ||
+                motherboardName.includes('b760') ||
+                motherboardName.includes('b660') ||
+                motherboardName.includes('x670') ||
+                motherboardName.includes('b650');
+
+            const ramDDR5 = ramName.includes('ddr5');
+            const ramDDR4 = ramName.includes('ddr4');
+
+            if (motherboardDDR5 && ramDDR4) {
+                compatibility.issues.push('⚠️ This motherboard supports DDR5 but you selected DDR4 RAM');
+            } else if (!motherboardDDR5 && ramDDR5) {
+                compatibility.issues.push('⚠️ This motherboard supports DDR4 but you selected DDR5 RAM');
+            }
+        }
+
+        // PSU power compatibility
+        if (selectedComponents.psu && Object.keys(selectedComponents).length > 1) {
+            const totalPower = Object.values(selectedComponents)
+                .filter(c => c.name !== selectedComponents.psu.name)
+                .reduce((sum, c) => sum + (c.power || c.TDP || 0), 0);
+
+            const psuWattage = parseInt(selectedComponents.psu.name.match(/(\d+)W/)?.[1] || '0');
+            const recommendedPower = Math.ceil(totalPower * 1.2);
+
+            if (psuWattage < recommendedPower) {
+                compatibility.issues.push(`⚠️ PSU (${psuWattage}W) may be insufficient. Recommended: ${recommendedPower}W+`);
+            } else if (psuWattage < totalPower * 1.1) {
+                compatibility.warnings.push(`⚡ PSU has minimal headroom. Consider higher wattage for safety.`);
+            }
+        }
+
+        // Display compatibility results
+        const compatibilityDiv = document.getElementById('compatibility-status');
+        if (compatibilityDiv) {
+            if (compatibility.issues.length > 0) {
+                compatibilityDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    <strong>🚨 Compatibility Issues Found:</strong>
+                    <ul class="mb-0 mt-2">
+                        ${compatibility.issues.map(issue => `<li>${issue}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+                compatibilityDiv.style.display = 'block';
+            } else if (compatibility.warnings.length > 0) {
+                compatibilityDiv.innerHTML = `
+                <div class="alert alert-warning">
+                    <strong>⚠️ Compatibility Warnings:</strong>
+                    <ul class="mb-0 mt-2">
+                        ${compatibility.warnings.map(warning => `<li>${warning}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+                compatibilityDiv.style.display = 'block';
+            } else if (Object.keys(selectedComponents).length >= 2) {
+                compatibilityDiv.innerHTML = `
+                <div class="alert alert-success">
+                    <strong>✅ All selected components are compatible!</strong>
+                </div>
+            `;
+                compatibilityDiv.style.display = 'block';
+            }
+        }
+
+        return compatibility;
+    }
+
+    // Enhanced filtering functions
+    function filterMotherboards(motherboards) {
+        if (!selectedComponents.cpu) return motherboards;
+
+        const cpuName = selectedComponents.cpu.name.toLowerCase();
+        const isIntel = cpuName.includes('intel') || cpuName.includes('i3') ||
+            cpuName.includes('i5') || cpuName.includes('i7') || cpuName.includes('i9');
+
+        return motherboards.filter(mb => {
+            const name = mb.name.toLowerCase();
+            if (isIntel) {
+                return name.includes('intel') || name.includes('lga') ||
+                    name.includes('z690') || name.includes('z790') ||
+                    name.includes('b660') || name.includes('b760');
+            } else {
+                return name.includes('amd') || name.includes('am4') || name.includes('am5') ||
+                    name.includes('b550') || name.includes('x570') ||
+                    name.includes('b650') || name.includes('x670');
+            }
+        });
+    }
+
+    function filterRAM(rams) {
+        if (!selectedComponents.motherboard) return rams;
+
+        const motherboardName = selectedComponents.motherboard.name.toLowerCase();
+
+        // Enhanced DDR5 motherboard detection
+        const supportsDDR5 = motherboardName.includes('ddr5') ||
+            motherboardName.includes('z790') ||
+            motherboardName.includes('z690') ||
+            motherboardName.includes('b760') ||
+            motherboardName.includes('b660') ||
+            motherboardName.includes('x670') ||
+            motherboardName.includes('b650');
+
+        return rams.filter(ram => {
+            const ramName = ram.name.toLowerCase();
+            const isDDR5 = ramName.includes('ddr5');
+            const isDDR4 = ramName.includes('ddr4');
+
+            if (supportsDDR5) {
+                return isDDR5;
+            } else {
+                return isDDR4;
+            }
+        });
+    }
+
+    function filterPSU(psus) {
+        console.log('Filtering PSUs, selected components:', selectedComponents);
+
+        const totalPower = Object.values(selectedComponents)
+            .reduce((sum, c) => {
+                const power = c.power || c.TDP || c.tdp || 0;
+                console.log(`Component ${c.name}: power = ${power}`);
+                return sum + (power > 0 ? power : 0);
+            }, 0);
+
+        console.log('Total power calculated:', totalPower);
+
+        const minPower = Math.ceil(totalPower * 1.2);
+        console.log('Min PSU power needed:', minPower);
+
+        document.getElementById('min-psu-power').textContent = `${minPower}W`;
+
+        if (totalPower === 0) {
+            console.log('Total power is 0, showing all PSUs');
+            return psus;
+        }
+
+        const filteredPSUs = psus.filter(psu => {
+            const wattage = parseInt(psu.name.match(/(\d+)W/)?.[1] || '0');
+            console.log(`PSU ${psu.name}: wattage = ${wattage}, meets requirement: ${wattage >= minPower}`);
+            return wattage >= minPower;
+        });
+
+        console.log('Filtered PSUs:', filteredPSUs);
+        return filteredPSUs;
+    }
+
+    // Show next step
+    function showNextStep(stepName) {
+        document.getElementById(`step-${stepName}`).style.display = 'block';
+    }
+
+    function enableCompleteButton() {
+        const component = JSON.parse(event.target.value);
+        selectedComponents['case'] = component;
+        updateSummary();
+        checkCompatibility();
+
+        // Only enable if no critical compatibility issues
+        const compatibility = checkCompatibility();
+        if (compatibility.issues.length === 0) {
+            document.getElementById('complete-btn').disabled = false;
+        }
+    }
+
+    // Update build summary
+    function updateSummary() {
+        const components = Object.values(selectedComponents);
+        const totalCost = components.reduce((sum, c) => sum + c.price, 0);
+        const totalPower = components.reduce((sum, c) => sum + (c.power > 0 ? c.power : 0), 0);
+
+        document.getElementById('total-cost').textContent = `$${totalCost.toFixed(2)}`;
+        document.getElementById('total-power').textContent = `${totalPower}W`;
+        document.getElementById('progress').textContent = `${components.length}/8`;
+
+        // Update component list
+        const componentsList = document.getElementById('selected-components');
+        componentsList.innerHTML = components.map(c =>
+            `<div class="small mb-1"><strong>${c.name}</strong> - $${c.price}</div>`
+        ).join('');
+    }
+
+    // Complete build - with compatibility check
+    function completeBuild() {
+        // Final compatibility check
+        const compatibility = checkCompatibility();
+        if (compatibility.issues.length > 0) {
+            alert('Please resolve compatibility issues before completing your build:\n\n' +
+                compatibility.issues.join('\n'));
+            return;
+        }
+
+        // Calculate bottleneck
+        const cpu = selectedComponents.cpu;
+        const gpu = selectedComponents.gpu;
+
+        if (cpu && gpu) {
+            const bottleneck = Math.abs((cpu.performance || 50) - (gpu.performance || 50));
+            const result = bottleneck < 10 ? 'Excellent' : bottleneck < 20 ? 'Good' : 'Poor';
+            const color = bottleneck < 10 ? 'text-success' : bottleneck < 20 ? 'text-warning' : 'text-danger';
+
+            document.getElementById('bottleneck-result').textContent = result;
+            document.getElementById('bottleneck-result').className = `mb-1 ${color}`;
+            document.getElementById('bottleneck-details').textContent =
+                bottleneck < 10 ? 'Your CPU and GPU are well balanced for optimal performance.' :
+                    bottleneck < 20 ? 'Minor bottleneck detected, but still good performance expected.' :
+                        'Significant bottleneck detected - consider rebalancing components.';
+        }
+
+        // Calculate totals
+        const totalCost = Object.values(selectedComponents).reduce((sum, c) => sum + c.price, 0);
+        const totalPower = Object.values(selectedComponents).reduce((sum, c) => sum + (c.power || c.TDP || 0), 0);
+
+        document.getElementById('final-cost').textContent = `$${totalCost.toFixed(2)}`;
+        document.getElementById('final-power').textContent = `${totalPower}W`;
+
+        // Populate components list in modal
+        const componentsList = document.getElementById('modal-components-list');
+        componentsList.innerHTML = '';
+
+        Object.entries(selectedComponents).forEach(([type, component]) => {
+            const div = document.createElement('div');
+            div.className = 'col-12 mb-2 pb-2 border-bottom';
+            div.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="badge bg-primary me-2">${type.toUpperCase()}</span>
+                    <span class="fw-medium">${component.name}</span>
+                </div>
+                <span class="text-success fw-bold">$${component.price}</span>
+            </div>
+        `;
+            componentsList.appendChild(div);
+        });
+
+        // Set default build name with current year
+        document.getElementById('build-name').value = `Gaming Build ${new Date().getFullYear()}`;
+
+        // Show the modal
+        const modal = new bootstrap.Modal(document.getElementById('completeModal'));
+        modal.show();
+    }
+
+    // Save build
+    async function saveBuild() {
+        const buildName = document.getElementById('build-name').value || 'My PC Build';
+        const isPublic = document.getElementById('make-public').checked;
+
+        const components = Object.values(selectedComponents);
+        const buildData = {
+            name: buildName,
+            description: 'Custom PC Build',
+            totalPrice: components.reduce((sum, c) => sum + c.price, 0),
+            totalWattage: components.reduce((sum, c) => sum + (c.power || c.TDP || 0), 0),
+            isPublic: isPublic,
+            isCompleted: true
+        };
+
+        console.log('Saving build data:', buildData);
+
+        try {
+            const response = await fetch('/Builds/Create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                },
+                body: JSON.stringify(buildData)
+            });
+
+            console.log('Save response:', response.status);
+
+            if (response.ok) {
+                alert('Build saved!');
+                window.location.href = '/Builds/Index';
+            } else {
+                const errorText = await response.text();
+                console.error('Save failed:', errorText);
+                alert('Error saving build: ' + response.status);
+            }
+        } catch (error) {
+            console.error('Save error:', error);
+            alert('Error saving build: ' + error.message);
+        }
+    }
+
+    // Hardcoded fallback data
+    function getHardcodedComponents(category) {
+        const data = {
+            cpu: [
+                { id: 1, name: "Intel Core i7-13700K", price: 419.99, power: 125, performance: 95 },
+                { id: 2, name: "AMD Ryzen 7 7700X", price: 349.99, power: 105, performance: 90 }
+            ],
+            motherboard: [
+                { id: 11, name: "ASUS ROG STRIX B550-F (AMD)", price: 189.99, power: 15, performance: 10 },
+                { id: 12, name: "ASUS Prime Z690-A (Intel DDR5)", price: 249.99, power: 20, performance: 10 }
+            ],
+            ram: [
+                { id: 5, name: "Corsair Vengeance DDR4-3200 32GB", price: 129.99, power: 10, performance: 20 },
+                { id: 25, name: "Corsair Vengeance DDR5-5600 32GB", price: 199.99, power: 10, performance: 25 }
+            ],
+            gpu: [
+                { id: 3, name: "NVIDIA GeForce RTX 4070", price: 599.99, power: 200, performance: 85 },
+                { id: 4, name: "AMD Radeon RX 7800 XT", price: 499.99, power: 263, performance: 80 }
+            ],
+            storage: [
+                { id: 7, name: "Samsung 980 PRO 2TB", price: 199.99, power: 7, performance: 25 },
+                { id: 8, name: "WD Black SN850X 1TB", price: 89.99, power: 6, performance: 20 }
+            ],
+            psu: [
+                { id: 9, name: "Corsair RM850x 850W", price: 139.99, power: -850, performance: 10 },
+                { id: 10, name: "Corsair CV650 650W", price: 69.99, power: -650, performance: 8 }
+            ],
+            cooling: [
+                { id: 13, name: "Noctua NH-D15", price: 99.99, power: 0, performance: 20 },
+                { id: 14, name: "Corsair H100i RGB", price: 149.99, power: 5, performance: 25 }
+            ],
+            case: [
+                { id: 15, name: "Fractal Design Define 7", price: 169.99, power: 0, performance: 0 },
+                { id: 16, name: "Corsair 4000D Airflow", price: 94.99, power: 0, performance: 0 }
+            ]
+        };
+        return data[category] || [];
+    }
+</script>

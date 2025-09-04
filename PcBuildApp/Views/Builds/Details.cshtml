@@ -1,0 +1,117 @@
+@model PcBuildApp.Data.Build
+
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>@Model.Name</h2>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                    if (currentUserId != null && Model.UserId.ToString() == currentUserId)
+                    {
+                        <a href="@Url.Action("Edit", new { id = Model.Id })" class="btn btn-warning">
+                            <i class="bi bi-pencil"></i> Edit Build
+                        </a>
+                    }
+                }
+            </div>
+            
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <p class="text-muted mb-4">@Model.Description</p>
+            }
+            
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Build Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="text-center p-3">
+                                <h4 class="text-success mb-1">$@Model.TotalPrice.ToString("N2")</h4>
+                                <small class="text-muted">Total Cost</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3">
+                                <h4 class="text-info mb-1">@Model.TotalWattage W</h4>
+                                <small class="text-muted">Power Draw</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3">
+                                @if (Model.IsCompleted)
+                                {
+                                    <span class="badge bg-success fs-6 px-3 py-2">
+                                        <i class="bi bi-check-circle"></i> Completed
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning fs-6 px-3 py-2">
+                                        <i class="bi bi-tools"></i> In Progress
+                                    </span>
+                                }
+                                <div><small class="text-muted mt-2 d-block">Status</small></div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3">
+                                @if (Model.IsPublic)
+                                {
+                                    <span class="badge bg-info fs-6 px-3 py-2">
+                                        <i class="bi bi-eye"></i> Public
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary fs-6 px-3 py-2">
+                                        <i class="bi bi-eye-slash"></i> Private
+                                    </span>
+                                }
+                                <div><small class="text-muted mt-2 d-block">Visibility</small></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-calendar3 me-2"></i>Build Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Created:</strong> @Model.InsertedAt.ToString("MMM dd, yyyy 'at' HH:mm")
+                        </div>
+                        @if (Model.ModifiedAt.HasValue)
+                        {
+                            <div class="col-md-6">
+                                <strong>Last Modified:</strong> @Model.ModifiedAt.Value.ToString("MMM dd, yyyy 'at' HH:mm")
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <a href="@Url.Action("Index")" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-left"></i> Back to Community Builds
+                </a>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <a href="@Url.Action("MyBuilds")" class="btn btn-outline-secondary ms-2">
+                        <i class="bi bi-collection"></i> My Builds
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>

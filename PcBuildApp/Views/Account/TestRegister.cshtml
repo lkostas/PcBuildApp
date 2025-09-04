@@ -1,0 +1,31 @@
+@model PcBuildApp.DTO.UserRegistrationDTO
+
+<h2>Test Registration</h2>
+
+<form method="post" action="/Account/Register">
+    <div>
+        <label>Username:</label>
+        <input name="UserName" type="text" value="testuser123" />
+    </div>
+    <div>
+        <label>Email:</label>
+        <input name="Email" type="email" value="test123@test.com" />
+    </div>
+    <div>
+        <label>Password:</label>
+        <input name="Password" type="password" value="Test123!" />
+    </div>
+    <div>
+        <label>Confirm Password:</label>
+        <input name="ConfirmPassword" type="password" value="Test123!" />
+    </div>
+    <div>
+        <label>First Name:</label>
+        <input name="FirstName" type="text" value="Test" />
+    </div>
+    <div>
+        <label>Last Name:</label>
+        <input name="LastName" type="text" value="User" />
+    </div>
+    <button type="submit">Register</button>
+</form>

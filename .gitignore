@@ -1,0 +1,9 @@
+bin/
+obj/
+.vs/
+*.user
+packages/
+appsettings.Development.json
+*.db
+.env
+node_modules/

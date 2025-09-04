@@ -1,0 +1,270 @@
+@model IEnumerable<PcBuildApp.Data.Component>
+
+@{
+    ViewData["Title"] = "PC Components";
+}
+
+@{
+    ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix = "";
+}
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@removeTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<div class="container-fluid mt-4">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="h3 mb-2">
+                <i class="bi bi-cpu text-primary me-2"></i>
+                PC Components
+            </h2>
+            <p class="text-muted">
+                Discover the latest computer components for your perfect build
+                @if (ViewBag.TotalComponents != null)
+                {
+                    <span class="badge bg-primary ms-2">@ViewBag.TotalComponents components</span>
+                }
+            </p>
+        </div>
+    </div>
+    
+    <!-- Filters Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <!-- Search -->
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted">Search Components</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" name="search" class="form-control" 
+                                       placeholder="Search by name, model, or description..." 
+                                       value="@ViewBag.CurrentSearch">
+                            </div>
+                        </div>
+                        
+                        <!-- Category Filter -->
+                        <div class="col-md-2">
+                            <label class="form-label small text-muted">Category</label>
+                            <select name="categoryId" class="form-select">
+                                <option value="">All Categories</option>
+                                @if (ViewBag.Categories != null)
+                                {
+                                    @foreach (var category in ViewBag.Categories)
+                                    {
+                                        string categorySelected = ViewBag.CurrentCategory?.ToString() == category.Id.ToString() ? "selected" : "";
+                                        <option value="@category.Id" @Html.Raw(categorySelected)>
+                                            @category.Name
+                                        </option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        
+                        <!-- Stock Filter -->
+                        <div class="col-md-2">
+                            <label class="form-label small text-muted">Availability</label>
+                            <select name="stockFilter" class="form-select">
+                                <option value="">All Items</option>
+                                @{
+                                    string inStockSelected = ViewBag.CurrentStockFilter == "instock" ? "selected" : "";
+                                    string outOfStockSelected = ViewBag.CurrentStockFilter == "outofstock" ? "selected" : "";
+                                }
+                                <option value="instock" @Html.Raw(inStockSelected)>
+                                    In Stock Only
+                                </option>
+                                <option value="outofstock" @Html.Raw(outOfStockSelected)>
+                                    Out of Stock
+                                </option>
+                            </select>
+                        </div>
+                        
+                        <!-- Sort -->
+                        <div class="col-md-2">
+                            <label class="form-label small text-muted">Sort By</label>
+                            <select name="sortBy" class="form-select">
+                                @{
+                                    string currentSort = ViewBag.CurrentSort?.ToString() ?? "";
+                                    string nameAscSelected = currentSort == "name_asc" ? "selected" : "";
+                                    string nameDescSelected = currentSort == "name_desc" ? "selected" : "";
+                                    string priceAscSelected = currentSort == "price_asc" ? "selected" : "";
+                                    string priceDescSelected = currentSort == "price_desc" ? "selected" : "";
+                                }
+                                <option value="">Newest First</option>
+                                <option value="name_asc" @Html.Raw(nameAscSelected)>
+                                    Name A-Z
+                                </option>
+                                <option value="name_desc" @Html.Raw(nameDescSelected)>
+                                    Name Z-A
+                                </option>
+                                <option value="price_asc" @Html.Raw(priceAscSelected)>
+                                    Price Low-High
+                                </option>
+                                <option value="price_desc" @Html.Raw(priceDescSelected)>
+                                    Price High-Low
+                                </option>
+                            </select>
+                        </div>
+                        
+                        <!-- Filter Buttons -->
+                        <div class="col-md-2">
+                            <label class="form-label small text-muted">&nbsp;</label>
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary flex-fill">
+                                    <i class="bi bi-funnel"></i> Filter
+                                </button>
+                                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-lg"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Components Grid -->
+    <div class="row">
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var component in Model)
+            {
+                <div class="col-xxl-3 col-xl-4 col-lg-4 col-md-6 mb-4">
+                    <div class="card component-card h-100 border-0 shadow-sm">
+                        <!-- Component Image -->
+                        <div class="position-relative">
+                            @if (!string.IsNullOrEmpty(component.ImageUrl))
+                            {
+                                <img src="@component.ImageUrl" class="card-img-top component-image" alt="@component.Name">
+                            }
+                            else
+                            {
+                                <div class="component-image d-flex align-items-center justify-content-center bg-light">
+                                    <i class="bi bi-cpu text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                            }
+                            
+                            <!-- Stock Badge -->
+                            <div class="position-absolute top-0 end-0 p-2">
+                                @if (component.IsInStock)
+                                {
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle"></i> In Stock
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">
+                                        <i class="bi bi-x-circle"></i> Out of Stock
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                        
+                        <!-- Component Details -->
+                        <div class="card-body d-flex flex-column">
+                            <div class="mb-2">
+                                <h5 class="card-title mb-1">@component.Name</h5>
+                                @if (!string.IsNullOrEmpty(component.Model))
+                                {
+                                    <p class="text-muted small mb-2">Model: @component.Model</p>
+                                }
+                            </div>
+                            
+                            @if (!string.IsNullOrEmpty(component.Description))
+                            {
+                                <p class="card-text text-muted small flex-grow-1">
+                                    @(component.Description.Length > 100 ? 
+                                      component.Description.Substring(0, 100) + "..." : 
+                                      component.Description)
+                                </p>
+                            }
+                            
+                            <!-- Price and Stock Info -->
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div>
+                                        <span class="h5 text-success mb-0">$@component.Price.ToString("N2")</span>
+                                        @if (component.IsInStock && component.StockQuantity > 0)
+                                        {
+                                            <div class="small text-muted">@component.StockQuantity available</div>
+                                        }
+                                    </div>
+                                </div>
+                                
+                                <!-- Action Buttons -->
+                                <div class="d-grid gap-2">
+                                    <a href="@Url.Action("Details", "Components", new { id = component.Id })" 
+                                       class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-eye"></i> View Details
+                                    </a>
+                                    
+                                    @if (User.Identity.IsAuthenticated && component.IsInStock)
+                                    {
+                                        <button class="btn btn-success btn-sm" onclick="addToBuild(@component.Id, '@component.Name')">
+                                            <i class="bi bi-plus-circle"></i> Add to Build
+                                        </button>
+                                    }
+                                    else if (User.Identity.IsAuthenticated && !component.IsInStock)
+                                    {
+                                        <button class="btn btn-secondary btn-sm" disabled>
+                                            <i class="bi bi-bell"></i> Notify When Available
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <!-- Empty State -->
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox" style="font-size: 5rem; color: #e9ecef;"></i>
+                    <h4 class="mt-3 text-muted">No Components Found</h4>
+                    <p class="text-muted mb-4">
+                        @if (!string.IsNullOrEmpty(ViewBag.CurrentSearch?.ToString()))
+                        {
+                            <span>No components match your search criteria.</span>
+                        }
+                        else
+                        {
+                            <span>No components are available at the moment.</span>
+                        }
+                    </p>
+                    
+                    @if (!string.IsNullOrEmpty(ViewBag.CurrentSearch?.ToString()) || ViewBag.CurrentCategory != null)
+                    {
+                        <a href="@Url.Action("Index")" class="btn btn-outline-primary">
+                            <i class="bi bi-arrow-left"></i> Clear Filters
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function addToBuild(componentId, componentName) {
+            // This will be enhanced later with actual build functionality
+            alert(`Added "${componentName}" to your build list!\n\n(Build functionality coming soon)`);
+        }
+        
+        // Auto-submit form on filter changes
+        document.querySelectorAll('select[name="categoryId"], select[name="stockFilter"], select[name="sortBy"]').forEach(select => {
+            select.addEventListener('change', function() {
+                this.form.submit();
+            });
+        });
+    </script>
+}

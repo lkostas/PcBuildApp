@@ -1,0 +1,213 @@
+@{
+ViewData["Title"] = "PC Building Simulator";
+}
+
+<!-- Hero Section with Big Processor -->
+<div class="hero-section text-center py-5">
+    <div class="container">
+        <div class="row align-items-center min-vh-75">
+            <div class="col-12">
+                <!-- Big Processor Image -->
+                <div class="processor-showcase mb-4">
+                    <i class="bi bi-cpu processor-icon"></i>
+                </div>
+
+                <!-- Main Message -->
+                <h1 class="display-4 fw-bold mb-4 text-primary">
+                    Time to build the computer of your dreams
+                </h1>
+
+                <p class="lead text-muted mb-4">
+                    Welcome to the PC Building Simulator! Design your perfect computer, check compatibility,
+                    analyze bottlenecks between CPU and GPU, and see real-time pricing - all without spending money.
+                </p>
+
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-center gap-3 mb-5">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                    <a href="@Url.Action("Create", "Builds")" class="btn btn-primary btn-lg">
+                        <i class="bi bi-plus-circle me-2"></i>Start Building Now
+                    </a>
+                    <a href="@Url.Action("MyBuilds", "Builds")" class="btn btn-outline-primary btn-lg">
+                        <i class="bi bi-collection me-2"></i>My Builds
+                    </a>
+                    }
+                    else
+                    {
+                    <a href="@Url.Action("Register", "Account")" class="btn btn-primary btn-lg">
+                        <i class="bi bi-person-plus me-2"></i>Start Building
+                    </a>
+                    <a href="@Url.Action("Index", "Builds")" class="btn btn-outline-primary btn-lg">
+                        <i class="bi bi-eye me-2"></i>View Community Builds
+                    </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Simulator Features -->
+<div class="py-5 bg-light">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="h3 mb-3">What Can You Do?</h2>
+                <p class="text-muted">Experience PC building without the cost</p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="text-center p-4">
+                    <div class="feature-icon bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="bi bi-check-circle fa-2x"></i>
+                    </div>
+                    <h5>Check Compatibility</h5>
+                    <p class="text-muted">Make sure all your components work together perfectly</p>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="text-center p-4">
+                    <div class="feature-icon bg-warning text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="bi bi-speedometer2 fa-2x"></i>
+                    </div>
+                    <h5>Analyze Bottlenecks</h5>
+                    <p class="text-muted">See if your CPU and GPU are well balanced</p>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="text-center p-4">
+                    <div class="feature-icon bg-success text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="bi bi-currency-dollar fa-2x"></i>
+                    </div>
+                    <h5>Calculate Costs</h5>
+                    <p class="text-muted">Get real-time pricing for your entire build</p>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="text-center p-4">
+                    <div class="feature-icon bg-info text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="bi bi-share fa-2x"></i>
+                    </div>
+                    <h5>Share Builds</h5>
+                    <p class="text-muted">Show off your configurations to the community</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Component Categories -->
+<div class="py-5">
+    <div class="container">
+        <div class="row text-center mb-4">
+            <div class="col-12">
+                <h2 class="h3 mb-3">Choose Your Components</h2>
+                <p class="text-muted">Start building with any component category</p>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <a href="@Url.Action("ByCategory", "Components", new { categoryId = 1 })" class="text-decoration-none">
+                    <div class="card text-center h-100 border-0 shadow-sm component-category-card">
+                        <div class="card-body">
+                            <i class="bi bi-cpu text-primary mb-2" style="font-size: 2.5rem;"></i>
+                            <h6 class="card-title">Processors</h6>
+                            <small class="text-muted">CPU - Brain of your PC</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <a href="@Url.Action("ByCategory", "Components", new { categoryId = 2 })" class="text-decoration-none">
+                    <div class="card text-center h-100 border-0 shadow-sm component-category-card">
+                        <div class="card-body">
+                            <i class="bi bi-gpu-card text-primary mb-2" style="font-size: 2.5rem;"></i>
+                            <h6 class="card-title">Graphics Cards</h6>
+                            <small class="text-muted">GPU - Gaming power</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <a href="@Url.Action("ByCategory", "Components", new { categoryId = 3 })" class="text-decoration-none">
+                    <div class="card text-center h-100 border-0 shadow-sm component-category-card">
+                        <div class="card-body">
+                            <i class="bi bi-memory text-primary mb-2" style="font-size: 2.5rem;"></i>
+                            <h6 class="card-title">Memory</h6>
+                            <small class="text-muted">RAM - Speed & capacity</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <a href="@Url.Action("ByCategory", "Components", new { categoryId = 4 })" class="text-decoration-none">
+                    <div class="card text-center h-100 border-0 shadow-sm component-category-card">
+                        <div class="card-body">
+                            <i class="bi bi-device-hdd text-primary mb-2" style="font-size: 2.5rem;"></i>
+                            <h6 class="card-title">Storage</h6>
+                            <small class="text-muted">SSD/HDD - Your data</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <a href="@Url.Action("ByCategory", "Components", new { categoryId = 5 })" class="text-decoration-none">
+                    <div class="card text-center h-100 border-0 shadow-sm component-category-card">
+                        <div class="card-body">
+                            <i class="bi bi-lightning text-primary mb-2" style="font-size: 2.5rem;"></i>
+                            <h6 class="card-title">Power Supply</h6>
+                            <small class="text-muted">PSU - Reliable power</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <a href="@Url.Action("ByCategory", "Components", new { categoryId = 6 })" class="text-decoration-none">
+                    <div class="card text-center h-100 border-0 shadow-sm component-category-card">
+                        <div class="card-body">
+                            <i class="bi bi-motherboard text-primary mb-2" style="font-size: 2.5rem;"></i>
+                            <h6 class="card-title">Motherboards</h6>
+                            <small class="text-muted">MOBO - Foundation</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <a href="@Url.Action("ByCategory", "Components", new { categoryId = 7 })" class="text-decoration-none">
+                    <div class="card text-center h-100 border-0 shadow-sm component-category-card">
+                        <div class="card-body">
+                            <i class="bi bi-fan text-primary mb-2" style="font-size: 2.5rem;"></i>
+                            <h6 class="card-title">Cooling</h6>
+                            <small class="text-muted">Keep it cool</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <a href="@Url.Action("ByCategory", "Components", new { categoryId = 8 })" class="text-decoration-none">
+                    <div class="card text-center h-100 border-0 shadow-sm component-category-card">
+                        <div class="card-body">
+                            <i class="bi bi-pc-display text-primary mb-2" style="font-size: 2.5rem;"></i>
+                            <h6 class="card-title">Cases</h6>
+                            <small class="text-muted">House everything</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

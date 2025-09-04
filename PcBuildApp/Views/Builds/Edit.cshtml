@@ -1,0 +1,42 @@
+@model PcBuildApp.Data.Build
+
+@{
+    ViewData["Title"] = "Edit Build";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Edit Build: @Model.Name</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label">Build Name</label>
+                            <input asp-for="Name" class="form-control" />
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            <input asp-for="IsPublic" class="form-check-input" type="checkbox" />
+                            <label asp-for="IsPublic" class="form-check-label">Make this build public</label>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-success">Save Changes</button>
+                            <a href="@Url.Action("MyBuilds")" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

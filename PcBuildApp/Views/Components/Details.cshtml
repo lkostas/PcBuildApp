@@ -1,0 +1,207 @@
+@model PcBuildApp.Data.Component
+
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="container mt-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Home</a></li>
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Components")">Components</a></li>
+            @if (ViewBag.Category != null)
+            {
+                <li class="breadcrumb-item"><a href="@Url.Action("ByCategory", "Components", new { categoryId = ViewBag.Category.Id })">@ViewBag.Category.Name</a></li>
+            }
+            <li class="breadcrumb-item active" aria-current="page">@Model.Name</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Component Image -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img src="@Model.ImageUrl" class="img-fluid w-100" alt="@Model.Name" style="height: 400px; object-fit: contain;">
+                    }
+                    else
+                    {
+                        <div class="d-flex align-items-center justify-content-center bg-light" style="height: 400px;">
+                            <i class="bi bi-cpu text-muted" style="font-size: 6rem;"></i>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Component Information -->
+        <div class="col-lg-6">
+            <div class="mb-3">
+                <h1 class="h2 mb-2">@Model.Name</h1>
+                @if (!string.IsNullOrEmpty(Model.Model))
+                {
+                    <p class="text-muted h5 mb-3">Model: @Model.Model</p>
+                }
+                
+                <!-- Stock Status -->
+                <div class="mb-3">
+                    @if (Model.IsInStock)
+                    {
+                        <span class="badge bg-success fs-6 px-3 py-2">
+                            <i class="bi bi-check-circle"></i> In Stock (@Model.StockQuantity available)
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger fs-6 px-3 py-2">
+                            <i class="bi bi-x-circle"></i> Out of Stock
+                        </span>
+                    }
+                </div>
+
+                <!-- Price -->
+                <div class="mb-4">
+                    <span class="display-6 text-success fw-bold">$@Model.Price.ToString("N2")</span>
+                </div>
+
+                <!-- Description -->
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    <div class="mb-4">
+                        <h5>Description</h5>
+                        <p class="text-muted">@Model.Description</p>
+                    </div>
+                }
+
+                <!-- Component Details -->
+                <div class="mb-4">
+                    <h5>Details</h5>
+                    <div class="row">
+                        @if (ViewBag.Category != null)
+                        {
+                            <div class="col-md-6 mb-2">
+                                <strong>Category:</strong>
+                                <a href="@Url.Action("ByCategory", "Components", new { categoryId = ViewBag.Category.Id })" class="text-decoration-none">
+                                    @ViewBag.Category.Name
+                                </a>
+                            </div>
+                        }
+                        @if (ViewBag.Manufacturer != null)
+                        {
+                            <div class="col-md-6 mb-2">
+                                <strong>Manufacturer:</strong> @ViewBag.Manufacturer.Name
+                            </div>
+                        }
+                        <div class="col-md-6 mb-2">
+                            <strong>Stock Quantity:</strong> @Model.StockQuantity
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <strong>Status:</strong> 
+                            @if (Model.IsActive)
+                            {
+                                <span class="text-success">Active</span>
+                            }
+                            else
+                            {
+                                <span class="text-danger">Inactive</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-grid gap-2 d-md-flex">
+                    @if (User.Identity.IsAuthenticated && Model.IsInStock)
+                    {
+                        <button class="btn btn-success btn-lg flex-md-fill" onclick="addToBuild(@Model.Id, '@Model.Name')">
+                            <i class="bi bi-plus-circle"></i> Add to Build
+                        </button>
+                    }
+                    else if (User.Identity.IsAuthenticated && !Model.IsInStock)
+                    {
+                        <button class="btn btn-secondary btn-lg flex-md-fill" disabled>
+                            <i class="bi bi-bell"></i> Notify When Available
+                        </button>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("Login", "Account")" class="btn btn-primary btn-lg flex-md-fill">
+                            <i class="bi bi-person"></i> Login to Add to Build
+                        </a>
+                    }
+                    
+                    <button class="btn btn-outline-secondary btn-lg" onclick="shareComponent()">
+                        <i class="bi bi-share"></i> Share
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Components -->
+    @if (ViewBag.RelatedComponents != null && ((IEnumerable<PcBuildApp.Data.Component>)ViewBag.RelatedComponents).Any())
+    {
+        <hr class="my-5">
+        
+        <div class="row">
+            <div class="col-12 mb-4">
+                <h3>Related Components</h3>
+                <p class="text-muted">Other components in the same category</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            @foreach (var relatedComponent in (IEnumerable<PcBuildApp.Data.Component>)ViewBag.RelatedComponents)
+            {
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card component-card h-100 border-0 shadow-sm">
+                        @if (!string.IsNullOrEmpty(relatedComponent.ImageUrl))
+                        {
+                            <img src="@relatedComponent.ImageUrl" class="card-img-top component-image" alt="@relatedComponent.Name">
+                        }
+                        else
+                        {
+                            <div class="component-image d-flex align-items-center justify-content-center bg-light">
+                                <i class="bi bi-cpu text-muted" style="font-size: 2rem;"></i>
+                            </div>
+                        }
+                        
+                        <div class="card-body">
+                            <h6 class="card-title">@relatedComponent.Name</h6>
+                            <p class="text-success mb-2">$@relatedComponent.Price.ToString("N2")</p>
+                            <a href="@Url.Action("Details", "Components", new { id = relatedComponent.Id })" class="btn btn-outline-primary btn-sm">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function addToBuild(componentId, componentName) {
+            alert(`Added "${componentName}" to your build!\n\n(Build functionality coming soon)`);
+        }
+        
+        function shareComponent() {
+            if (navigator.share) {
+                navigator.share({
+                    title: '@Model.Name',
+                    text: 'Check out this PC component: @Model.Name',
+                    url: window.location.href
+                });
+            } else {
+                // Fallback: copy URL to clipboard
+                navigator.clipboard.writeText(window.location.href).then(function() {
+                    alert('Link copied to clipboard!');
+                });
+            }
+        }
+    </script>
+}
