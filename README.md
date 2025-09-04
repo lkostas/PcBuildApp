@@ -65,34 +65,5 @@ dotnet ef database update
 ```bash
 dotnet run
 ```
-
-### **Build and Deployment**
-
-**Development Build:**
-```bash
-dotnet restore
-dotnet build
-dotnet run
-```
-
-**Production Build:**
-```bash
-dotnet build --configuration Release
-dotnet publish --configuration Release --output ./publish
-```
-
-**Docker Deployment:**
-```dockerfile
-FROM mcr.microsoft.com/dotnet/aspnet:6.0
-WORKDIR /app
-COPY ./publish .
-ENTRYPOINT ["dotnet", "PcBuildApp.dll"]
-```
-
-**Database Migration in Production:**
-```bash
-dotnet ef database update --connection "ProductionConnectionString"
-```
-
 ### **Default Data**
 The application includes comprehensive seed data with sample components, categories, and manufacturers for immediate testing and demonstration.
