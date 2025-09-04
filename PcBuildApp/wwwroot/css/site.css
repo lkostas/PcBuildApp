@@ -140,11 +140,11 @@ body {
 }
 
 /* Utility classes */
-.text-primary { color: #007bff !important; }
-.text-success { color: #28a745 !important; }
-.text-danger { color: #dc3545 !important; }
-.text-warning { color: #ffc107 !important; }
-.text-info { color: #17a2b8 !important; }
+.text-primary { color: #007bff }
+.text-success { color: #28a745 }
+.text-danger { color: #dc3545  }
+.text-warning { color: #ffc107  }
+.text-info { color: #17a2b8  }
 
 /* Dark mode support (future enhancement) */
 @media (prefers-color-scheme: dark) {
@@ -173,7 +173,7 @@ body {
 
 .component-category-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
 }
 
 @keyframes processorPulse {
@@ -246,7 +246,7 @@ body {
 }
 
 .component-item:hover {
-    border-color: #007bff !important;
+    border-color: #007bff;
     box-shadow: 0 2px 8px rgba(0,123,255,0.2);
     transform: translateY(-1px);
 }
